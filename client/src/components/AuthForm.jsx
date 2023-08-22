@@ -4,19 +4,36 @@ const AuthForm = ({ setToken }) => {
   const [alert, setAlert] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [signIn, setSignIn] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const result = await fetch("/auth/signIn", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
+    let data;
 
-    const data = await result.json();
+    if (signIn) {
+      const result = await fetch("/auth/signIn", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      data = await result.json();
+    } else {
+      const result = await fetch("/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ firstName, lastName, username, password }),
+      });
+
+      data = await result.json();
+    }
 
     if (data.token) {
       setAlert("");
@@ -28,9 +45,25 @@ const AuthForm = ({ setToken }) => {
 
   return (
     <>
-      <p>Sign in to see trains</p>
+      <p>{signIn ? "Sign in" : "Register"} to see trains or <a href="#" onClick={() => setSignIn(!signIn)}>{signIn ? "Register" : "Sign in"} here</a></p>
       {alert}
       <form onSubmit={handleSubmit}>
+        <label hidden={signIn}>
+          First Name:
+          <input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+        </label>
+        <label hidden={signIn}>
+          Last Name:
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+        </label>
         <label>
           Username:
           <input
